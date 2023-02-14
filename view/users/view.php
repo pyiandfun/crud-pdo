@@ -1,22 +1,33 @@
 <?php
-include 'function.php';
-//check user login or not
-session_start();
-if(!isset($_SESSION['usermail']) && !isset($_SESSION['userpassword'])){
-    header("location: ../login.php");
-  }
-//call data with id
-if(isset($_REQUEST['id'])){
-    $id = $_REQUEST['id'];
-    $select=$pdo->prepare("SELECT * FROM crud WHERE id=$id");
-    $select->execute();
-    $row=$select->fetch(PDO::FETCH_OBJ);
-    // $username=$row->username;
-    // $email=$row->email;
-    // print_r($row);
-} 
-//edit form
+
+include ('../../controller/books/function.php');
+
+    //check user login or not
+    session_start();
+
+    if(!isset($_SESSION['usermail']) && !isset($_SESSION['userpassword'])) {
+
+        header("location: ../login.php");
+
+    }
+
+    //call data with id
+    if(isset($_REQUEST['id'])) {
+
+        $id = $_REQUEST['id'];
+
+        $select=$pdo->prepare("SELECT * FROM users WHERE id=$id");
+
+        $select->execute();
+        $row=$select->fetch(PDO::FETCH_OBJ);
+        
+        // $username=$row->username;
+        // $email=$row->email;
+        // print_r($row);
+    } 
+    //edit form
 ?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -53,10 +64,10 @@ if(isset($_REQUEST['id'])){
     <div class="container m-5" style="height: 360px;">
         <form action="update.php" method="post" id="form">
             <div class="mb-3">
-                <input type="text" name="username" class="form-control" placeholder="username" value="<?php echo $row->username;?>">
+                <input type="text" name="user_name" class="form-control" placeholder="username" value="<?php echo $row->user_name;?>">
             </div>
             <div class="mb-3">
-                <input type="text" name="email" class="form-control" placeholder="email" value="<?php echo $row->email;?>">
+                <input type="text" name="user_email" class="form-control" placeholder="email" value="<?php echo $row->user_email;?>">
             </div>
             <div class="mb-3">
                 <input type="hidden" name="id" class="form-control" value="<?php echo $row->id;?>">
@@ -70,12 +81,18 @@ if(isset($_REQUEST['id'])){
     </footer>
 <!-- yes or cancle confirm -->
         <script>
-            function myDelete(){
-                if(confirm("Are you sure to Delete?!")){
+            function myDelete() {
+                
+                if(confirm("Are you sure to Delete?!")) {
+
                     // console.log('true')
-                    window.location.replace('delete.php?delete="1"&id="<?=$row->id?>"')
+                    // window.location.replace('delete.php?delete="1"&id="<?=$row->id?>"')
+                    window.location.replace('../../controller/users/delete.php?delete="1"&id="<?=$row->id?>"')
+
+
                 }
             }
+            
         </script>
     </body>
 </html>

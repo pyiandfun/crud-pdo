@@ -1,5 +1,7 @@
 <?php
-include ('function.php');
+
+include ('../../controller/books/function.php');
+
 session_start();
 if(!isset($_SESSION['usermail']) && !isset($_SESSION['userpassword'])){
   header("location: ../login.php");
@@ -9,6 +11,7 @@ $previous = "javascript:history.go(-1)";
 if(isset($_SERVER['HTTP_REFERER'])) {
     $previous = $_SERVER['HTTP_REFERER'];
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +48,7 @@ if(isset($_SERVER['HTTP_REFERER'])) {
 </div>
 <div class="container" style="height: 450px;">
   <h3 class="text-center p-3">Add new books</h3>
-  <form action="function.php" method="post" class="mx-auto my-5 w-75">
+  <form action="../../controller/books/function.php" method="post" class="mx-auto my-5 w-75">
     <div action="form-group m-3">
       <label>Book's Name</label>
       <input type="text" class="form-control form-control-sm" placeholder="Book's Name" name="bookname">

@@ -1,4 +1,3 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 <?php
 
     try {
@@ -30,11 +29,11 @@
 
             if( $add->rowCount() ) {
 
-                header('location:list.php');
+                header('location:../../view/books/list.php');
                 
             }else{
 
-                header('location:index.php');
+                header('location:add.php');
 
             }
 
