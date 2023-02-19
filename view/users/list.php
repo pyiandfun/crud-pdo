@@ -6,6 +6,8 @@
   // session_start();
   if(!isset($_SESSION['usermail']) && !isset($_SESSION['userpassword'])) {
 
+
+
     header("location: ../login.php");
 
   }
@@ -25,13 +27,16 @@
       $entries_count = $stmt->fetchColumn();
       $totalPages = ceil($entries_count / PER_PAGE);
 
-      $pagenow=isset($_GET["page"])? $_GET["page"] : 2;
+
+      if (isset($_GET['page']) && is_numeric($_GET['page'])) {
+        $page = $_GET['page'];
+      } else {
+        $page = 1;  // Default to the first page
+      }
+
+      $pagenow=isset($_GET["page"])? $_GET["page"] : 1;
       $limit=($pagenow-1) * PER_PAGE;
       $offset = PER_PAGE;
-
-      $stmt=$pdo->prepare("SELECT * FROM users ORDER BY id LIMIT $limit,$offset");
-      $stmt->execute();
-      $users=$stmt->fetchAll();
 
 ?>
 
@@ -62,7 +67,7 @@
                         <a class="page-link nav-link active" aria-current="page" href="#">Users</a>
                     </li>
                     <li class="page-item nav-item">
-                        <a class="page-link nav-link"aria-current="page" href="../books/list.php">Books</a>
+                        <a class="page-link nav-link"aria-current="page" href="../books/list.php?page=1">Books</a>
                     </li>
                 </ul>
             </div>
@@ -89,6 +94,8 @@ if($_GET>'' && isset($_GET['sortOrder'])) {
   $sortOrder = $_GET['sortOrder'];
 
   switch($sortOrder) {
+    case 'id':
+      $user_id = 'selected';
     case 'user_name':
       $user_name = 'selected';
       break;
@@ -130,6 +137,7 @@ if($_GET && isset($_GET['sortDirection'])) {
               <option value="ASC" <?php echo ($asc_direction)?$asc_direction:'';?>>Ascending</option>
               <option value="DESC" <?php echo ($desc_direction)?$desc_direction:'';?>>Descending</option>
             </select>
+            <input type="hidden" name="page" value="1">
           <input type="submit" name="sort" value="Sort">
         </form>
       </div>
@@ -164,77 +172,72 @@ if($_GET && isset($_GET['sortDirection'])) {
       }
 ?>
   </div>
-
-
-    <!-- <table class="table table-striped mx-auto my-5 w-75">
-      <thead>
-        <tr>
-          <th scope="col">id</th>
-          <th scope="col">Username</th>
-          <th scope="col">email</th>
-          <th scope="col">View Detail</th>
-        </tr>
-      </thead>
-      <tbody> -->
             
 <?php
+if(isset($_POST['search'])) {
 
-    if(isset($_POST['search'])){
-      
-      $keyword=$_POST['keyword'];
+  $keyword=$_POST['keyword'];
 
-      $query = $pdo->prepare("SELECT * FROM users WHERE user_name LIKE :keyword OR user_email LIKE :keyword OR user_password LIKE :keyword");
+  // var_dump($keyword);
+  // die();
 
-        $query->bindParam(":keyword", $keyword);
-        $query->execute();
+  $query = $pdo->prepare("SELECT * FROM users WHERE user_name LIKE :keyword OR user_email LIKE :keyword OR user_password LIKE :keyword");
+  $query->bindParam(":keyword", $keyword);
+  $query->execute();
 
-        echo '<table class="table table-striped mx-auto my-5 w-75">';
-        echo "<tr><th>id</th><th>User Name</th><th>Email</th><th>View</th></tr>";
+  echo '<table class="table table-striped mx-auto my-5 w-75">';
+  echo "<tr><th>id</th><th>User Name</th><th>User Email</th><th>View</th></tr>";
 
-        while($row=$query->fetch()){
-          ?><tr><?php
-          echo
-            '<td>'.$row['id'].'</td>'.
-            '<td>'.$row['user_name'].'</td>'.
-            '<td>'.$row['user_email'].'</td>'.
-            '<td>
-              <button class="btn btn-secondary" type="submit" name="edit">
-                  <a href="view.php?id='.$row['id'].'" class="text-light">View</a>
-              </button>
-            </td>';
-            echo "</tr>";
-            echo "</table>";
+  while($row=$query->fetch()){
+      ?><tr><?php
+      echo
+        '<td>'.$row['id'].'</td>'.
+        '<td>'.$row['user_name'].'</td>'.
+        '<td>'.$row['user_email'].'</td>'.
+        '<td>
+          <button class="btn btn-secondary" type="submit" name="edit">
+              <a href="view.php?id='.$row['id'].'" class="text-light">View</a>
+          </button>
+        </td>'; 
+        echo "</tr>";
       }
-
-    } else if(isset($_GET['sort'])) {
+    echo "</table>";
+    
+      } else if($_GET && isset($_GET['sort'])) {
 
       $sortOrder = $_GET['sortOrder'];
       $sortDirection = $_GET['sortDirection'];
 
-      $stmt = $pdo->prepare("SELECT * FROM users ORDER BY $sortOrder $sortDirection");
+      $stmt = $pdo->prepare("SELECT * FROM users ORDER BY $sortOrder $sortDirection LIMIT $limit,$offset");
 
       $stmt->execute();
 
-      $books = $stmt->fetchAll();
+      $users = $stmt->fetchAll();
 
       echo '<table class="table table-striped mx-auto my-5 w-75">';
       echo "<tr><th>id</th><th>User Name</th><th>Email</th><th>View</th></tr>";
       
-      foreach ($books as $book) {
+      foreach ($users as $user) {
       echo "<tr>";
-      echo "<td>" . $book['id'] . "</td>";
-      echo "<td>" . $book['user_name'] . "</td>";
-      echo "<td>" . $book['user_email'] . "</td>";
+      echo "<td>" . $user['id'] . "</td>";
+      echo "<td>" . $user['user_name'] . "</td>";
+      echo "<td>" . $user['user_email'] . "</td>";
       echo '<td>
         <button class="btn btn-secondary" type="submit" name="edit">
-          <a href="view.php?id='.$book['id'].'" class="text-light">View</a>
+          <a href="view.php?id='.$user['id'].'" class="text-light">View</a>
         </button>
       </td>'; 
       echo "</tr>";
     }
     echo "</table>";
 
-    }else{
+    }
+    else{
+
+      $stmt=$pdo->prepare("SELECT * FROM users ORDER BY id LIMIT $limit,$offset");
+      $stmt->execute();
+
+      $users=$stmt->fetchAll();
 
       echo '<table class="table table-striped mx-auto my-5 w-75">';
       echo "<tr><th>id</th><th>User Name</th><th>Email</th><th>View</th></tr>";
@@ -264,15 +267,12 @@ if($_GET && isset($_GET['sortDirection'])) {
     <div class="text-center m-3 d-flex justify-content-center ">
     <ul class="pagination">
 <?php
-
-
-    for($page=1; $page<=$totalPages; $page++){
+    for($page=1; $page<=$totalPages; $page++) {
 ?>
   
   <li class="page-item">
-    <a class="page-link text-center m-1 p-2 <?php echo (isset($_GET['page']) && $_GET['page'] == $page)? "active":"" ?>" href='list.php?page=<?php if(isset($page)){echo $page;} ?>'><?php echo '<span>'.$page . '</span>'; ?></a>
+    <a class="page-link text-center m-1 p-2 <?php echo (!isset($_GET) && !$_GET['page'])?"active":((isset($_GET['page']) && $_GET['page'] == $page)?"active":"");?>" href='list.php?sortOrder=<?php echo isset($sortOrder)?$sortOrder:'id';?>&sortDirection=<?php echo isset($sortDirection)?$sortDirection:'ASC'?>&sort=Sort&&page=<?php echo $page ;?>'><?php echo '<span>'.$page . '</span>'; ?></a>
   </li>
-
 
 <?php } ?>
     </ul>
@@ -288,7 +288,6 @@ if($_GET && isset($_GET['sortDirection'])) {
                 window.location.replace('../../controller/logout.php')
             }
         }
-
 
   </script>
 
